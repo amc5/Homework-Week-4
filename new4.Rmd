@@ -1,0 +1,16 @@
+#hw wee 4
+
+```{r}
+a<- ppois(q=8, lambda = 15,lower.tail = FALSE)
+a
+b<- dpois(x=0, lambda = 15)
+b
+c<- dpois(x=3, lambda = 15)
+c
+d<- barplot(dpois(x= 0:30, lambda = 15), space = 0, names.arg = 0:30, ylab = "Pr(X<=x)", xlab= "x")
+d
+e<- rpois(n=104, lambda = 15)
+e
+f<- hist(e, xlim = c(0,30), xlab = "x", main = "Histogram of Simulated Results")
+f
+```
