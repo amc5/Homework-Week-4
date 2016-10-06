@@ -4,7 +4,6 @@
 f<- file.choose()
 f
 d<- read.csv(f, sep= ",", header=T)
-d
 ##this chunk of code loads the zombie file data into R
 ```
 
@@ -15,20 +14,15 @@ d
 summary(d) ##gives me a basic idea of what I'm dealing with here, also provides way to check mean answers
 sdv<- function(x){sqrt(sum((x-mean(x))^2)/length(x))} ##created a function for the standard deviation, could not use var() because it would have divided by the wrong length
 
-h<- mean(d$height, na.rm = T)
-h
+mean(d$height, na.rm = T)
 sdv(d$height) 
-w<- mean(d$weight, na.rm = T)
-w
+mean(d$weight, na.rm = T)
 sdv(d$weight)
-a<- mean(d$age, na.rm = T)
-a
+mean(d$age, na.rm = T)
 sdv(d$age)
-k<- mean(d$zombies_killed, na.rm = T)
-k
+mean(d$zombies_killed, na.rm = T)
 sdv(d$zombies_killed)
-e<- mean(d$years_of_education, na.rm = T)
-e
+mean(d$years_of_education, na.rm = T)
 sdv(d$years_of_education)
 ```
 
@@ -47,9 +41,7 @@ ggplot(d, aes(x=gender, y=years_of_education, fill=gender))+geom_boxplot()
 #Use ggplot and make a scatterplots of height and weight in relation to age. Do these variables seem to be related? In what way?
 ```{r}
 gh<- ggplot(d, aes(x=age, y=height))+geom_point() ##I put age on the x axis because this makes it easier for me to compare the two different scatterplots
-gh
 gw<- ggplot(d, aes(x=age, y=weight))+geom_point()
-gw
 #Both height and weight are both positively correlated with age, with height being more closely correlated with weight varying.  More fat young people than tall young people.
 ```
 
@@ -57,26 +49,16 @@ gw
 #Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not (hint: not all are drawn from the normal distribution)? For those that are not, can you determine what common distribution they are drawn from?
 ```{r}
 hh<-hist(d$height, col="pink")
-hh
 hd<- hist(d$weight, col="yellow")
-hd
 ha<- hist(d$age, col="brown") ###don't be fooled, this is more of a burnt adobe color
-ha
 hz<- hist(d$zombies_killed, col="turquoise")
-hz
 hy<- hist(d$years_of_education, col="purple")
-hy
 
 qh<- qqnorm(d$height, col="deeppink2")
-qh
 qw<-qqnorm(d$weight, col="goldenrod1")
-qw
 qa<- qqnorm(d$age, col="saddlebrown")
-qa
 qz<- qqnorm(d$zombies_killed, col="mediumaquamarine")
-qz
 qy<-qqnorm(d$years_of_education, col= "orchid4")
-qy
 
 #All histograms are normally distributed, EXCEPT zombies_killed and years_of_educations.  These two distributions are left skewed and Poisson distribution because they are discrete random variables.
 ```
@@ -85,7 +67,6 @@ qy
 #Now use the sample() function to sample ONE subset of 30 zombies (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you will need to base your estimate of the CIs on some different distribution.
 ```{r}
 subzom<- d[sample(1:nrow(d), 30, replace=F, prob=NULL),]
-subzom
 ster<- function(x){sd(x)/sqrt(length(x))} ##standard error function to be used with each variable
 nfci<- function(x){
   c(mean(x)-2*ster(x),mean(x)+2*ster(x))
