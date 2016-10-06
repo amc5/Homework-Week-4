@@ -1,0 +1,208 @@
+#Homework week 5
+***Module 8: Homework Problem 2***
+```{r}
+f<- file.choose()
+f
+d<- read.csv(f, sep= ",", header=T)
+d
+##this chunk of code loads the zombie file data into R
+```
+
+**Number 1**
+#Calculate the population mean and standard deviation for each quantitative random variable (height, weight, age, number of zombies killed, and years of education). NOTE: You will not want to use the built in var() and sd() commands as these are for samples.
+
+```{r}
+summary(d) ##gives me a basic idea of what I'm dealing with here, also provides way to check mean answers
+sdv<- function(x){sqrt(sum((x-mean(x))^2)/length(x))} ##created a function for the standard deviation, could not use var() because it would have divided by the wrong length
+
+h<- mean(d$height, na.rm = T)
+h
+sdv(d$height) 
+w<- mean(d$weight, na.rm = T)
+w
+sdv(d$weight)
+a<- mean(d$age, na.rm = T)
+a
+sdv(d$age)
+k<- mean(d$zombies_killed, na.rm = T)
+k
+sdv(d$zombies_killed)
+e<- mean(d$years_of_education, na.rm = T)
+e
+sdv(d$years_of_education)
+```
+
+**Number 2**
+#Use ggplot and make boxplots of each of these variable by gender.
+```{r}
+library(ggplot2)
+ggplot(d, aes(x=gender, y=height, fill=gender))+geom_boxplot()
+ggplot(d, aes(x=gender, y=weight, fill=gender))+geom_boxplot()
+ggplot(d, aes(x=gender, y=age, fill=gender))+geom_boxplot()
+ggplot(d, aes(x=gender, y=zombies_killed, fill=gender))+geom_boxplot()
+ggplot(d, aes(x=gender, y=years_of_education, fill=gender))+geom_boxplot()
+```
+
+**Number 3**
+#Use ggplot and make a scatterplots of height and weight in relation to age. Do these variables seem to be related? In what way?
+```{r}
+ggplot(d, aes(x=age, y=height))+geom_point() ##I put age on the x axis because this makes it easier for me to compare the two different scatterplots
+ggplot(d, aes(x=age, y=weight))+geom_point()
+#Both height and weight are both positively correlated with age, with height being more closely correlated with weight varying.  More fat young people than tall young people.
+```
+
+**Number 4**
+#Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not (hint: not all are drawn from the normal distribution)? For those that are not, can you determine what common distribution they are drawn from?
+```{r}
+hist(d$height, col="pink")
+hist(d$weight, col="yellow")
+hist(d$age, col="brown") ###don't be fooled, this is more of a burnt adobe color
+hist(d$zombies_killed, col="turquoise")
+hist(d$years_of_education, col="purple")
+
+qqnorm(d$height, col="deeppink2")
+qqnorm(d$weight, col="goldenrod1")
+qqnorm(d$age, col="saddlebrown")
+qqnorm(d$zombies_killed, col="mediumaquamarine")
+qqnorm(d$years_of_education, col= "orchid4")
+
+#All histograms are normally distributed, EXCEPT zombies_killed and years_of_educations.  These two distributions are left skewed and Poisson distribution because they are discrete random variables.
+```
+
+**Number 5**
+#Now use the sample() function to sample ONE subset of 30 zombies (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you will need to base your estimate of the CIs on some different distribution.
+```{r}
+subzom<- d[sample(1:nrow(d), 30, replace=F, prob=NULL),]
+subzom
+ster<- function(x){sd(x)/sqrt(length(x))} ##standard error function to be used with each variable
+nfci<- function(x){
+  c(mean(x)-2*ster(x),mean(x)+2*ster(x))
+  }
+
+hm<- mean(subzom$height)
+hsdv<- sd(subzom$height)
+hse<- ster(subzom$height)
+left<- hm-hse
+left
+right<- hm+hse
+right
+hci<- c(left, right)
+hci
+##this is the long way to find the 95% confidence interval, then I built the above function
+nfci(subzom$height)
+
+mean(subzom$weight)
+sd(subzom$weight)
+ster(subzom$weight)
+nfci(subzom$weight)
+
+mean(subzom$age)
+sd(subzom$age)
+ster(subzom$age)
+nfci(subzom$age)
+
+##the below are not normally distributed, and therefore require a new function to build the 95% confidence interval.  Bootstrapping should calculate the confidence interval by simmulation, meaning it does not presume the underlying distribution of the variable.
+
+sterpois<- function(x){sqrt(mean(x)/length(x))}
+nncipois<- function(x){c(mean(x)-qpois(1-0.05/2, lambda = mean(x))*sterpois(x),mean(x)+qpois(1-0.05/2, lambda = mean(x))*sterpois(x))}
+
+mean(subzom$zombies_killed)
+sd(subzom$zombies_killed)
+ster(subzom$zombies_killed)
+sterpois(subzom$zombies_killed)
+nncipois(subzom$zombies_killed)
+##Below tried to bootstrap as another option to dealing with non normalized data, however I just dont think this worked.  I am still confused about the concept of bootstrapping.
+set<- NULL
+n<- 30
+for(i in 1) {set[i] <- mean(sample(d$zombies_killed, n, replace=F))}
+quantile(set)
+quantile(set, c(0.025, 0.975))
+
+mean(subzom$years_of_education)
+sd(subzom$years_of_education)
+ster(subzom$years_of_education)
+sterpois(subzom$years_of_education)
+nncipois(subzom$years_of_education)
+##same bootstrapping issue as above, but i gave it the good ole college try
+set<- NULL
+n<- 30
+for(i in 1) {set[i] <- mean(sample(d$years_of_education, n, replace=F))}
+quantile(set)
+quantile(set, c(0.025, 0.975))
+```
+
+**Number 6**
+#Now draw 99 more random samples of 30 zombies out and calculate the mean for each of the these samples. Together with the first sample you drew out, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of this distribution for each variable? How do the standard deviations compare to the standard errors estimated in [5]? What do these sampling distributions look like? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
+```{r}
+k<- 99 ## number of samples
+n<- 30 ## sample size
+s<- NULL
+
+##height mean of sampling distribution
+for(i in 1:k){
+  s[[i]]<- sample(d$height, n, replace=F)
+}
+
+m=NULL
+for(i in 1:k){
+  m[i]<- mean(s[[i]])
+}
+mean(m)
+sd(m)
+sd(m)/sqrt(length(m)) ##for a sampling distribution, standard deviation=standard error.  this is why this equation is used here.
+hist(m)
+
+##weight mean of sampling distribution
+for(i in 1:k){
+  s[[i]]<- sample(d$weight, n, replace=F)
+}
+m=NULL
+for(i in 1:k){
+  m[i]<- mean(s[[i]])
+}
+mean(m)
+sd(m)
+sd(m)/sqrt(length(m))
+hist(m)
+
+##age mean of sampling distribution
+for(i in 1:k){
+  s[[i]]<- sample(d$age, n, replace=F)
+}
+m=NULL
+for(i in 1:k){
+  m[i]<- mean(s[[i]])
+}
+mean(m)
+sd(m)
+sd(m)/sqrt(length(m))
+hist(m)
+
+##zombies killed mean of sampling distribution
+for(i in 1:k){
+  s[[i]]<- sample(d$zombies_killed, n, replace=F)
+}
+m=NULL
+for(i in 1:k){
+  m[i]<- mean(s[[i]])
+}
+mean(m)
+sd(m)
+sd(m)/sqrt(length(m))
+hist(m)
+
+## years of education mean of sampling distribution
+for(i in 1:k){
+  s[[i]]<- sample(d$years_of_education, n, replace=F)
+}
+m=NULL
+for(i in 1:k){
+  m[i]<- mean(s[[i]])
+}
+mean(m)
+sd(m)
+sd(m)/sqrt(length(m))
+hist(m)
+
+#The sample mean is an unbiased estimator for the population mean. The standard deviations of this distribution are different from the standard errors calculated in number 5 by a magnitude of 10.  All of these sampling distributions appear to be normally distributed.  This is different than before in Number 4 because we took out 99 random samples of 30 zombies rather than looking at the complete data set.  This means that the sample becomes normalized.
+```
